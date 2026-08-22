@@ -2,6 +2,8 @@
 issue: https://github.com/praxis-proxy/praxis/issues/784
 discussion: https://github.com/praxis-proxy/praxis/issues/784
 status: proposed
+repos:
+  - praxis
 authors:
   - henschwartz
 graduation_criteria:
@@ -23,6 +25,18 @@ stakeholders:
   - shaneutt
   - twghu
   - alexsnaps
+epic: Observability Epic
+related:
+  - 00799
+  - 00797
+  - 00798
+  - 00796
+  - 00794
+origin:
+  repo: praxis
+  issue: https://github.com/praxis-proxy/praxis/issues/784
+  file: 00784_structured-security-audit-log-format.md
+  pr: https://github.com/praxis-proxy/praxis/pull/1004
 ---
 
 # Structured Security Audit Log Format Evaluation
@@ -51,8 +65,10 @@ once the format and sink architecture are agreed.
 
 - **`policy` filter** — rejects with stable violation codes on the
   `X-Policy-Violation` response header (for example
-  `auth.invalid_token`, `policy.deny`, `pii.detected`). Codes are
-  part of the public contract for audit/SIEM consumers.
+  `auth.invalid_token`, `apl.policy`, `pii.detected`). CPEX policy
+  violations use the `apl.policy` namespace; `policy.deny` is the
+  gateway-local fallback in `http_authz_rejection` when no specific
+  violation is supplied, not a policy-engine code.
 - **`basic_auth`** — HTTP 401 with `WWW-Authenticate`
 - **`ip_acl`** — allow/deny by client IP
 - **`rate_limit`** — HTTP 429 when quotas are exceeded
@@ -106,8 +122,9 @@ For each candidate, the spike should assess:
 1. **Written comparison** of the formats with pros/cons for Praxis
    (OpenShift egress, SIEM forwarding, operator skill sets).
 2. **Schema draft** for the recommended format, including at least one
-   **sample denial event** (for example `policy.deny` or
-   `auth.invalid_token`) with realistic field values.
+   **sample denial event** (for example `apl.policy` or
+   `auth.invalid_token`; gateway fallback `policy.deny` when no code
+   is supplied) with realistic field values.
 3. **Sink architecture recommendation** — separate file/syslog/Kafka
    sink vs extension of access log vs process log — with rationale and
    interaction with
